@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Pokemon TCG Discord Raffle Formatter</title>
+  <style>
+    :root {
+      --bg: #f4f2ea;
+      --panel: #fffdf7;
+      --ink: #1f2a37;
+      --muted: #5f6b7a;
+      --line: #d6d3c7;
+      --accent: #ff6b2c;
+      --accent-2: #1d9a89;
+      --danger: #c43c3c;
+      --shadow: 0 12px 28px rgba(16, 24, 40, 0.08);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--ink);
+      font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 10% 15%, #ffe7cf 0, transparent 28%),
+        radial-gradient(circle at 90% 0%, #d7f2ef 0, transparent 30%),
+        linear-gradient(180deg, #f9f7f0 0%, #ece9de 100%);
+      padding: 24px;
+    }
+
+    .wrap {
+      max-width: 1180px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      background: linear-gradient(90deg, #fff4df, #f4fbfa);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-head h1,
+    .panel-head h2 {
+      margin: 0;
+      font-size: 1.05rem;
+      letter-spacing: 0.03em;
+    }
+
+    .panel-body {
+      padding: 16px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .section {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 12px;
+      background: #fff;
+    }
+
+    .section-title {
+      margin: 0 0 10px;
+      font-size: 0.92rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .grid-1 {
+      display: grid;
+      gap: 10px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 0.9rem;
+      color: var(--muted);
+    }
+
+    input,
+    select,
+    textarea,
+    button {
+      font: inherit;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      border: 1px solid #c9c5b8;
+      border-radius: 10px;
+      padding: 10px 11px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      outline: 2px solid color-mix(in oklab, var(--accent), white 60%);
+      border-color: var(--accent);
+    }
+
+    .currency {
+      position: relative;
+    }
+
+    .currency span {
+      position: absolute;
+      left: 11px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #7b6e52;
+      font-weight: 700;
+    }
+
+    .currency input {
+      padding-left: 24px;
+    }
+
+    .inline {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .dynamic-row {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr auto;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    .dynamic-row.single {
+      grid-template-columns: 1fr auto;
+    }
+
+    .payment-row {
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 8px;
+      align-items: center;
+      margin-top: 8px;
+      padding: 6px 8px;
+      border: 1px solid #ece8dc;
+      border-radius: 10px;
+    }
+
+    .payment-row.off {
+      opacity: 0.62;
+      background: #faf8f2;
+    }
+
+    .payment-row input[type="checkbox"] {
+      width: auto;
+      transform: scale(1.12);
+      accent-color: var(--accent-2);
+    }
+
+    .btn {
+      border: 0;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 10px;
+      padding: 9px 12px;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      transition: transform 0.08s ease, filter 0.16s ease;
+    }
+
+    .btn:hover {
+      filter: brightness(0.95);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn.secondary {
+      background: var(--accent-2);
+    }
+
+    .btn.ghost {
+      background: #f0ede4;
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+
+    .btn.danger {
+      background: var(--danger);
+    }
+
+    .btn.small {
+      padding: 7px 10px;
+      font-weight: 600;
+      font-size: 0.85rem;
+    }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .preview-box {
+      padding: 16px;
+      background: #111827;
+      color: #f8fafc;
+      border-radius: 12px;
+      border: 1px solid #1f2937;
+      min-height: 320px;
+      white-space: pre-wrap;
+      line-height: 1.42;
+      font-size: 0.95rem;
+      overflow-wrap: anywhere;
+    }
+
+    .drop-zone {
+      border: 2px dashed #c9c5b8;
+      border-radius: 10px;
+      padding: 12px;
+      background: #fff;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .drop-zone:focus {
+      outline: 2px solid color-mix(in oklab, var(--accent-2), white 65%);
+      border-color: var(--accent-2);
+    }
+
+    .image-preview {
+      width: 100%;
+      max-height: 260px;
+      object-fit: contain;
+      border: 1px solid #c9c5b8;
+      border-radius: 10px;
+      background: #fff;
+      display: none;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #d7d2c3;
+      background: #fff;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.84rem;
+      color: #654f30;
+    }
+
+    .notice {
+      min-height: 1.2rem;
+      font-size: 0.86rem;
+      color: #236a57;
+    }
+
+    @media (max-width: 980px) {
+      .wrap {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 650px) {
+      body {
+        padding: 14px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .dynamic-row,
+      .dynamic-row.single {
+        grid-template-columns: 1fr;
+      }
+
+      .dynamic-row .btn,
+      .dynamic-row.single .btn {
+        justify-self: start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="panel">
+      <div class="panel-head">
+        <h1>Pokemon TCG Raffle Builder</h1>
+        <span class="pill" id="remainingPill">0/0 remaining</span>
+      </div>
+      <div class="panel-body">
+        <div class="section">
+          <h3 class="section-title">Core Details</h3>
+          <div class="grid">
+            <label>
+              Title
+              <input id="title" type="text" placeholder="ASCENDED HEROES ETB" />
+            </label>
+            <label>
+              Raffle Tag (optional)
+              <input id="raffleTag" type="text" placeholder="@Raffle" />
+            </label>
+            <label>
+              Total Spots
+              <input id="totalSpots" type="number" min="0" step="1" placeholder="30" />
+            </label>
+            <label>
+              Price Per Spot
+              <div class="currency">
+                <span>$</span>
+                <input id="pricePerSpot" type="number" min="0" step="0.01" placeholder="5" />
+              </div>
+            </label>
+            <label>
+              Remaining Spots (auto)
+              <input id="remainingSpots" type="number" min="0" step="1" readonly />
+            </label>
+          </div>
+        </div>
+
+        <div class="section">
+          <h3 class="section-title">Payment Options</h3>
+          <div id="payments"></div>
+        </div>
+
+        <div class="section">
+          <div class="inline" style="justify-content: space-between;">
+            <h3 class="section-title" style="margin: 0;">Bonus Deals</h3>
+            <button class="btn small secondary" id="addBonus" type="button">Add Deal</button>
+          </div>
+          <div id="bonusDeals"></div>
+        </div>
+
+        <div class="section">
+          <div class="inline" style="justify-content: space-between;">
+            <h3 class="section-title" style="margin: 0;">Claimed Spots</h3>
+            <button class="btn small secondary" id="addClaim" type="button">Add Claim</button>
+          </div>
+          <div id="claimedSpots"></div>
+          <div class="meta" style="margin-top: 8px;">Use values like 3+1 for purchased + bonus. Remaining spots count purchased spots only.</div>
+        </div>
+
+        <div class="section grid-1">
+          <h3 class="section-title">Templates</h3>
+          <div class="grid">
+            <label>
+              Template Name
+              <input id="templateName" type="text" placeholder="ETB 30 spots" />
+            </label>
+            <label>
+              Saved Templates
+              <select id="templateSelect">
+                <option value="">Select a template</option>
+              </select>
+            </label>
+          </div>
+          <div class="actions">
+            <button class="btn" id="saveTemplate" type="button">Save Template</button>
+            <button class="btn ghost" id="loadTemplate" type="button">Load Template</button>
+            <button class="btn danger" id="deleteTemplate" type="button">Delete Template</button>
+            <button class="btn ghost" id="resetForm" type="button">Reset Form</button>
+          </div>
+          <div class="notice" id="notice"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <div class="panel-head">
+        <h2>Discord Preview</h2>
+        <div class="actions">
+          <button class="btn secondary" id="copyOutput" type="button">Copy Text</button>
+          <button class="btn" id="copyOutputWithImage" type="button">Copy Text + Image</button>
+        </div>
+      </div>
+      <div class="panel-body">
+        <div class="preview-box" id="output" aria-live="polite"></div>
+
+        <div class="section">
+          <h3 class="section-title">Image Attach (Upload or Paste)</h3>
+          <div class="grid-1">
+            <label>
+              Upload Image
+              <input id="raffleImageInput" type="file" accept="image/*" />
+            </label>
+            <div id="imagePasteZone" class="drop-zone" tabindex="0">
+              Click here and paste an image (Cmd+V) or use the upload field above.
+            </div>
+            <img id="raffleImagePreview" class="image-preview" alt="Raffle image preview" />
+            <div class="actions">
+              <button class="btn ghost" id="clearImage" type="button">Clear Image</button>
+            </div>
+            <div class="meta">Best flow: copy from this tool, then paste directly into Discord.</div>
+          </div>
+        </div>
+
+        <div class="section" style="margin-top: 12px;">
+          <div class="inline" style="justify-content: space-between;">
+            <h3 class="section-title" style="margin: 0;">Spots Left Update Generator</h3>
+            <button class="btn small secondary" id="addQuickClaim" type="button">Add Claimed User</button>
+          </div>
+          <div class="grid" style="margin-top: 8px;">
+            <label>
+              Total Spots
+              <input id="quickTotalSpots" type="number" min="0" step="1" placeholder="30" />
+            </label>
+            <label>
+              Spots Left (auto)
+              <input id="quickRemainingSpots" type="number" min="0" step="1" readonly />
+            </label>
+          </div>
+          <div id="quickClaimedSpots" style="margin-top: 8px;"></div>
+          <div class="actions" style="margin-top: 10px;">
+            <button class="btn secondary" id="copyQuickOutput" type="button">Copy Spots Update</button>
+          </div>
+          <div class="preview-box" id="quickOutput" aria-live="polite" style="margin-top: 10px; min-height: 190px;"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = "discordRaffleFormState_v1";
+    const TEMPLATE_KEY = "discordRaffleTemplates_v1";
+
+    const paymentDefaults = [
+      { id: "zelle", emoji: "🟩", name: "Zelle", value: "" },
+      { id: "cashapp", emoji: "🟦", name: "cash app", value: "" },
+      { id: "venmo", emoji: "🟡", name: "Venmo", value: "" },
+      { id: "applepay", emoji: "🍎", name: "Apple Pay", value: "" },
+      { id: "other", emoji: "💳", name: "Other", value: "" }
+    ];
+
+    const el = {
+      title: document.getElementById("title"),
+      raffleTag: document.getElementById("raffleTag"),
+      totalSpots: document.getElementById("totalSpots"),
+      pricePerSpot: document.getElementById("pricePerSpot"),
+      remainingSpots: document.getElementById("remainingSpots"),
+      payments: document.getElementById("payments"),
+      bonusDeals: document.getElementById("bonusDeals"),
+      claimedSpots: document.getElementById("claimedSpots"),
+      output: document.getElementById("output"),
+      remainingPill: document.getElementById("remainingPill"),
+      notice: document.getElementById("notice"),
+      templateName: document.getElementById("templateName"),
+      templateSelect: document.getElementById("templateSelect"),
+      quickTotalSpots: document.getElementById("quickTotalSpots"),
+      quickRemainingSpots: document.getElementById("quickRemainingSpots"),
+      quickClaimedSpots: document.getElementById("quickClaimedSpots"),
+      quickOutput: document.getElementById("quickOutput"),
+      raffleImageInput: document.getElementById("raffleImageInput"),
+      imagePasteZone: document.getElementById("imagePasteZone"),
+      raffleImagePreview: document.getElementById("raffleImagePreview")
+    };
+
+    const uid = () => Math.random().toString(36).slice(2, 10);
+
+    const state = {
+      bonuses: [],
+      claims: [],
+      quickClaims: [],
+      raffleImageFile: null,
+      raffleImageObjectUrl: ""
+    };
+
+    function revokeImageObjectUrl() {
+      if (state.raffleImageObjectUrl) {
+        URL.revokeObjectURL(state.raffleImageObjectUrl);
+        state.raffleImageObjectUrl = "";
+      }
+    }
+
+    function setRaffleImage(file) {
+      if (!file || !file.type || !file.type.startsWith("image/")) {
+        showNotice("Please select a valid image file.");
+        return;
+      }
+
+      state.raffleImageFile = file;
+      revokeImageObjectUrl();
+      state.raffleImageObjectUrl = URL.createObjectURL(file);
+      el.raffleImagePreview.src = state.raffleImageObjectUrl;
+      el.raffleImagePreview.style.display = "block";
+      showNotice("Image attached for copy/paste.");
+    }
+
+    function clearRaffleImage() {
+      state.raffleImageFile = null;
+      revokeImageObjectUrl();
+      el.raffleImagePreview.removeAttribute("src");
+      el.raffleImagePreview.style.display = "none";
+      el.raffleImageInput.value = "";
+      showNotice("Image cleared.");
+    }
+
+    function safeNumber(value) {
+      const n = Number(value);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function parseClaim(input) {
+      const clean = (input || "").replace(/\s+/g, "");
+      if (!clean) {
+        return { purchased: 0, bonus: 0 };
+      }
+
+      // Supports formats like 3, 3+1, 3+1+2.
+      const parts = clean.split("+").filter(Boolean);
+      if (parts.length === 0) {
+        return { purchased: 0, bonus: 0 };
+      }
+
+      const nums = parts.map((p) => safeNumber(p));
+      const purchased = nums[0] || 0;
+      const bonus = nums.slice(1).reduce((acc, n) => acc + n, 0);
+      return { purchased, bonus };
+    }
+
+    function fmtPrice(num) {
+      if (!Number.isFinite(num)) {
+        return "0";
+      }
+      return Number.isInteger(num) ? String(num) : num.toFixed(2);
+    }
+
+    function showNotice(text) {
+      el.notice.textContent = text;
+      setTimeout(() => {
+        if (el.notice.textContent === text) {
+          el.notice.textContent = "";
+        }
+      }, 2200);
+    }
+
+    function getPaymentsFromUI() {
+      return paymentDefaults.map((def) => {
+        const checked = document.getElementById(`pay-check-${def.id}`).checked;
+        const value = document.getElementById(`pay-text-${def.id}`).value.trim();
+        return {
+          ...def,
+          checked,
+          value
+        };
+      });
+    }
+
+    function renderPayments() {
+      el.payments.innerHTML = "";
+
+      const controls = document.createElement("div");
+      controls.className = "actions";
+      controls.innerHTML = `
+        <button class="btn small ghost" id="paymentsAllOn" type="button">All On</button>
+        <button class="btn small ghost" id="paymentsAllOff" type="button">All Off</button>
+      `;
+      el.payments.appendChild(controls);
+
+      paymentDefaults.forEach((p) => {
+        const row = document.createElement("div");
+        row.className = "payment-row";
+        row.innerHTML = `
+          <input id="pay-check-${p.id}" type="checkbox" checked>
+          <label style="margin:0; color: var(--ink);">
+            ${p.emoji} ${p.name}
+            <input id="pay-text-${p.id}" type="text" placeholder="Optional handle/details" />
+          </label>
+        `;
+        el.payments.appendChild(row);
+      });
+
+      function syncPaymentAvailabilityUI() {
+        paymentDefaults.forEach((p) => {
+          const check = document.getElementById(`pay-check-${p.id}`);
+          const text = document.getElementById(`pay-text-${p.id}`);
+          const row = check.closest(".payment-row");
+          text.disabled = !check.checked;
+          row.classList.toggle("off", !check.checked);
+        });
+      }
+
+      el.payments.querySelectorAll("input").forEach((input) => {
+        input.addEventListener("input", update);
+        input.addEventListener("change", () => {
+          syncPaymentAvailabilityUI();
+          update();
+        });
+      });
+
+      document.getElementById("paymentsAllOn").addEventListener("click", () => {
+        paymentDefaults.forEach((p) => {
+          document.getElementById(`pay-check-${p.id}`).checked = true;
+        });
+        syncPaymentAvailabilityUI();
+        update();
+      });
+
+      document.getElementById("paymentsAllOff").addEventListener("click", () => {
+        paymentDefaults.forEach((p) => {
+          document.getElementById(`pay-check-${p.id}`).checked = false;
+        });
+        syncPaymentAvailabilityUI();
+        update();
+      });
+
+      syncPaymentAvailabilityUI();
+    }
+
+    function addBonusRow(value = "") {
+      state.bonuses.push({ id: uid(), text: value });
+      renderBonuses();
+      update();
+    }
+
+    function renderBonuses() {
+      el.bonusDeals.innerHTML = "";
+      if (state.bonuses.length === 0) {
+        const hint = document.createElement("div");
+        hint.className = "meta";
+        hint.textContent = "No bonus deals added yet.";
+        el.bonusDeals.appendChild(hint);
+        return;
+      }
+
+      state.bonuses.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "dynamic-row single";
+        row.innerHTML = `
+          <input data-bonus-id="${item.id}" type="text" placeholder="Buy 3 get 1 EXTRA 🎫" value="${item.text.replace(/"/g, "&quot;")}" />
+          <button class="btn small danger" data-remove-bonus="${item.id}" type="button">Remove</button>
+        `;
+        el.bonusDeals.appendChild(row);
+      });
+
+      el.bonusDeals.querySelectorAll("[data-bonus-id]").forEach((input) => {
+        input.addEventListener("input", (e) => {
+          const item = state.bonuses.find((b) => b.id === e.target.dataset.bonusId);
+          if (item) {
+            item.text = e.target.value;
+            update();
+          }
+        });
+      });
+
+      el.bonusDeals.querySelectorAll("[data-remove-bonus]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          state.bonuses = state.bonuses.filter((b) => b.id !== e.target.dataset.removeBonus);
+          renderBonuses();
+          update();
+        });
+      });
+    }
+
+    function addClaimRow(username = "", spots = "") {
+      state.claims.push({ id: uid(), username, spots });
+      renderClaims();
+      update();
+    }
+
+    function addQuickClaimRow(username = "", spots = "") {
+      state.quickClaims.push({ id: uid(), username, spots });
+      renderQuickClaims();
+      update();
+    }
+
+    function renderClaims() {
+      el.claimedSpots.innerHTML = "";
+      if (state.claims.length === 0) {
+        const hint = document.createElement("div");
+        hint.className = "meta";
+        hint.textContent = "No claimed spots yet.";
+        el.claimedSpots.appendChild(hint);
+        return;
+      }
+
+      state.claims.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "dynamic-row";
+        row.innerHTML = `
+          <input data-claim-user="${item.id}" type="text" placeholder="@Username" value="${item.username.replace(/"/g, "&quot;")}" />
+          <input data-claim-spots="${item.id}" type="text" placeholder="3+1" value="${item.spots.replace(/"/g, "&quot;")}" />
+          <button class="btn small danger" data-remove-claim="${item.id}" type="button">Remove</button>
+        `;
+        el.claimedSpots.appendChild(row);
+      });
+
+      el.claimedSpots.querySelectorAll("[data-claim-user]").forEach((input) => {
+        input.addEventListener("input", (e) => {
+          const item = state.claims.find((c) => c.id === e.target.dataset.claimUser);
+          if (item) {
+            item.username = e.target.value;
+            update();
+          }
+        });
+      });
+
+      el.claimedSpots.querySelectorAll("[data-claim-spots]").forEach((input) => {
+        input.addEventListener("input", (e) => {
+          const item = state.claims.find((c) => c.id === e.target.dataset.claimSpots);
+          if (item) {
+            item.spots = e.target.value;
+            update();
+          }
+        });
+      });
+
+      el.claimedSpots.querySelectorAll("[data-remove-claim]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          state.claims = state.claims.filter((c) => c.id !== e.target.dataset.removeClaim);
+          renderClaims();
+          update();
+        });
+      });
+    }
+
+    function renderQuickClaims() {
+      el.quickClaimedSpots.innerHTML = "";
+      if (state.quickClaims.length === 0) {
+        const hint = document.createElement("div");
+        hint.className = "meta";
+        hint.textContent = "No claimed users in spots update yet.";
+        el.quickClaimedSpots.appendChild(hint);
+        return;
+      }
+
+      state.quickClaims.forEach((item) => {
+        const row = document.createElement("div");
+        row.className = "dynamic-row";
+        row.innerHTML = `
+          <input data-quick-claim-user="${item.id}" type="text" placeholder="@Username" value="${item.username.replace(/"/g, "&quot;")}" />
+          <input data-quick-claim-spots="${item.id}" type="text" placeholder="3+1" value="${item.spots.replace(/"/g, "&quot;")}" />
+          <button class="btn small danger" data-remove-quick-claim="${item.id}" type="button">Remove</button>
+        `;
+        el.quickClaimedSpots.appendChild(row);
+      });
+
+      el.quickClaimedSpots.querySelectorAll("[data-quick-claim-user]").forEach((input) => {
+        input.addEventListener("input", (e) => {
+          const item = state.quickClaims.find((c) => c.id === e.target.dataset.quickClaimUser);
+          if (item) {
+            item.username = e.target.value;
+            update();
+          }
+        });
+      });
+
+      el.quickClaimedSpots.querySelectorAll("[data-quick-claim-spots]").forEach((input) => {
+        input.addEventListener("input", (e) => {
+          const item = state.quickClaims.find((c) => c.id === e.target.dataset.quickClaimSpots);
+          if (item) {
+            item.spots = e.target.value;
+            update();
+          }
+        });
+      });
+
+      el.quickClaimedSpots.querySelectorAll("[data-remove-quick-claim]").forEach((btn) => {
+        btn.addEventListener("click", (e) => {
+          state.quickClaims = state.quickClaims.filter((c) => c.id !== e.target.dataset.removeQuickClaim);
+          renderQuickClaims();
+          update();
+        });
+      });
+    }
+
+    function getFormState() {
+      return {
+        title: el.title.value.trim(),
+        raffleTag: el.raffleTag.value.trim(),
+        totalSpots: safeNumber(el.totalSpots.value),
+        pricePerSpot: safeNumber(el.pricePerSpot.value),
+        payments: getPaymentsFromUI(),
+        bonuses: state.bonuses.map((b) => ({ ...b })),
+        claims: state.claims.map((c) => ({ ...c })),
+        quickTotalSpots: safeNumber(el.quickTotalSpots.value),
+        quickClaims: state.quickClaims.map((c) => ({ ...c }))
+      };
+    }
+
+    function applyState(data) {
+      el.title.value = data.title || "";
+      el.raffleTag.value = data.raffleTag || "";
+      el.totalSpots.value = data.totalSpots ?? "";
+      el.pricePerSpot.value = data.pricePerSpot ?? "";
+      el.quickTotalSpots.value = data.quickTotalSpots ?? "";
+
+      const payments = Array.isArray(data.payments) ? data.payments : [];
+      paymentDefaults.forEach((def) => {
+        const saved = payments.find((p) => p.id === def.id) || {};
+        const check = document.getElementById(`pay-check-${def.id}`);
+        const text = document.getElementById(`pay-text-${def.id}`);
+        check.checked = typeof saved.checked === "boolean" ? saved.checked : true;
+        text.value = saved.value || "";
+      });
+
+      state.bonuses = Array.isArray(data.bonuses)
+        ? data.bonuses.map((b) => ({
+            id: b.id || uid(),
+            text: b.text || ""
+          }))
+        : [];
+
+      state.claims = Array.isArray(data.claims)
+        ? data.claims.map((c) => ({
+            id: c.id || uid(),
+            username: c.username || "",
+            spots: c.spots || ""
+          }))
+        : [];
+
+      state.quickClaims = Array.isArray(data.quickClaims)
+        ? data.quickClaims.map((c) => ({
+            id: c.id || uid(),
+            username: c.username || "",
+            spots: c.spots || ""
+          }))
+        : [];
+
+      renderBonuses();
+      renderClaims();
+      renderQuickClaims();
+      update();
+    }
+
+    function saveDraft() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(getFormState()));
+    }
+
+    function loadDraft() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (!raw) {
+          return;
+        }
+        const parsed = JSON.parse(raw);
+        applyState(parsed);
+      } catch (_err) {
+        // Ignore invalid persisted data and continue with defaults.
+      }
+    }
+
+    function getTemplates() {
+      try {
+        const raw = localStorage.getItem(TEMPLATE_KEY);
+        if (!raw) {
+          return {};
+        }
+        const parsed = JSON.parse(raw);
+        return parsed && typeof parsed === "object" ? parsed : {};
+      } catch (_err) {
+        return {};
+      }
+    }
+
+    function setTemplates(data) {
+      localStorage.setItem(TEMPLATE_KEY, JSON.stringify(data));
+      renderTemplateOptions();
+    }
+
+    function renderTemplateOptions() {
+      const templates = getTemplates();
+      const names = Object.keys(templates).sort((a, b) => a.localeCompare(b));
+      el.templateSelect.innerHTML = "<option value=\"\">Select a template</option>";
+      names.forEach((name) => {
+        const option = document.createElement("option");
+        option.value = name;
+        option.textContent = name;
+        el.templateSelect.appendChild(option);
+      });
+    }
+
+    function buildOutput(form) {
+      const total = Math.max(0, form.totalSpots);
+      const claimedPurchased = form.claims.reduce((sum, c) => sum + parseClaim(c.spots).purchased, 0);
+      const remaining = Math.max(0, total - claimedPurchased);
+
+      const title = form.title || "RAFFLE TITLE";
+      const price = fmtPrice(form.pricePerSpot);
+
+      const paymentLines = form.payments
+        .filter((p) => p.checked)
+        .map((p) => `${p.emoji} ${p.name} : ${p.value || ""}`);
+
+      const bonusLines = form.bonuses
+        .map((b) => b.text.trim())
+        .filter(Boolean)
+        .map((b) => `➡️ ${b}`);
+
+      const claimLines = form.claims
+        .filter((c) => c.username.trim() || c.spots.trim())
+        .map((c) => {
+          const user = c.username.trim() || "@Username";
+          const normalizedUser = user.startsWith("@") ? user : `@${user}`;
+          const spots = c.spots.trim() || "0";
+          return `✅ ${normalizedUser} [${spots}]`;
+        });
+
+      const tagLine = form.raffleTag ? `🍀🍀 ${form.raffleTag}` : "🍀🍀";
+
+      const lines = [
+        `# ${title}`,
+        "",
+        "WINNER: LAST NAME STANDING ON WHEEL",
+        "",
+        "🍀🍀",
+        "",
+        `${total}🎫 at $${price}/ea`,
+        "",
+        `## ${remaining}/${total} 🎫 REMAINING`,
+        "",
+        "### 💰 PAYMENT OPTIONS:",
+        ...(paymentLines.length ? paymentLines : ["No payment options selected"]),
+        "(Payment due after filled)",
+        "",
+        tagLine,
+        "",
+        "### 🎫 BONUS DEALS:",
+        ...(bonusLines.length ? bonusLines : ["➡️ None"]),
+        "",
+        `**BONUS 🎫 ARE EXTRA 🎫 ON THE WHEEL AND NOT A REDUCTION FROM ORIGINAL ${total}**`,
+        "",
+        "### CLAIMED 🎫:",
+        ...(claimLines.length ? claimLines : ["No claims yet"])
+      ];
+
+      return { text: lines.join("\n"), remaining, total };
+    }
+
+    function update() {
+      const form = getFormState();
+      const built = buildOutput(form);
+      el.output.textContent = built.text;
+      el.remainingPill.textContent = `${built.remaining}/${built.total} remaining`;
+      el.remainingSpots.value = String(built.remaining);
+
+      const quickTotal = Math.max(0, safeNumber(el.quickTotalSpots.value));
+      const quickClaimed = state.quickClaims.reduce((sum, c) => sum + parseClaim(c.spots).purchased, 0);
+      const quickRemaining = Math.max(0, quickTotal - quickClaimed);
+      el.quickRemainingSpots.value = String(quickRemaining);
+
+      const quickClaimLines = state.quickClaims
+        .filter((c) => c.username.trim() || c.spots.trim())
+        .map((c) => {
+          const user = c.username.trim() || "@Username";
+          const normalizedUser = user.startsWith("@") ? user : `@${user}`;
+          const spots = c.spots.trim() || "0";
+          return `✅ ${normalizedUser} [${spots}]`;
+        });
+
+      const quickLines = [
+        "## SPOTS LEFT UPDATE",
+        "",
+        `### ${quickRemaining}/${quickTotal} 🎫 LEFT`,
+        "",
+        "### CLAIMED 🎫:",
+        ...(quickClaimLines.length ? quickClaimLines : ["No claims yet"])
+      ];
+      el.quickOutput.textContent = quickLines.join("\n");
+
+      saveDraft();
+    }
+
+    function resetForm() {
+      applyState({
+        title: "",
+        raffleTag: "",
+        totalSpots: "",
+        pricePerSpot: "",
+        payments: paymentDefaults.map((p) => ({ ...p, checked: true, value: "" })),
+        bonuses: [],
+        claims: [],
+        quickTotalSpots: "",
+        quickClaims: []
+      });
+    }
+
+    function copyOutput() {
+      const text = el.output.textContent || "";
+      navigator.clipboard.writeText(text)
+        .then(() => showNotice("Copied Discord output to clipboard."))
+        .catch(() => showNotice("Clipboard copy failed. Select and copy manually."));
+    }
+
+    async function copyOutputWithImage() {
+      const text = el.output.textContent || "";
+      const image = state.raffleImageFile;
+
+      if (!image) {
+        copyOutput();
+        showNotice("No image attached. Copied text only.");
+        return;
+      }
+
+      if (!navigator.clipboard || !window.ClipboardItem || !navigator.clipboard.write) {
+        navigator.clipboard.writeText(text)
+          .then(() => showNotice("Browser copied text only. Add image manually in Discord."))
+          .catch(() => showNotice("Clipboard copy failed. Select and copy manually."));
+        return;
+      }
+
+      try {
+        const clipItem = new ClipboardItem({
+          "text/plain": new Blob([text], { type: "text/plain" }),
+          [image.type]: image
+        });
+        await navigator.clipboard.write([clipItem]);
+        showNotice("Copied text + image. Paste directly into Discord.");
+      } catch (_err) {
+        navigator.clipboard.writeText(text)
+          .then(() => showNotice("Copied text only. Browser blocked image copy."))
+          .catch(() => showNotice("Clipboard copy failed. Select and copy manually."));
+      }
+    }
+
+    function copyQuickOutput() {
+      const text = el.quickOutput.textContent || "";
+      navigator.clipboard.writeText(text)
+        .then(() => showNotice("Copied spots update to clipboard."))
+        .catch(() => showNotice("Clipboard copy failed. Select and copy manually."));
+    }
+
+    function setupTemplateActions() {
+      document.getElementById("saveTemplate").addEventListener("click", () => {
+        const name = el.templateName.value.trim();
+        if (!name) {
+          showNotice("Template name is required.");
+          return;
+        }
+        const templates = getTemplates();
+        templates[name] = getFormState();
+        setTemplates(templates);
+        el.templateSelect.value = name;
+        showNotice(`Template '${name}' saved.`);
+      });
+
+      document.getElementById("loadTemplate").addEventListener("click", () => {
+        const name = el.templateSelect.value;
+        if (!name) {
+          showNotice("Select a template to load.");
+          return;
+        }
+        const templates = getTemplates();
+        if (!templates[name]) {
+          showNotice("Template not found.");
+          return;
+        }
+        applyState(templates[name]);
+        el.templateName.value = name;
+        showNotice(`Template '${name}' loaded.`);
+      });
+
+      document.getElementById("deleteTemplate").addEventListener("click", () => {
+        const name = el.templateSelect.value;
+        if (!name) {
+          showNotice("Select a template to delete.");
+          return;
+        }
+        const templates = getTemplates();
+        delete templates[name];
+        setTemplates(templates);
+        el.templateSelect.value = "";
+        showNotice(`Template '${name}' deleted.`);
+      });
+    }
+
+    function wireActions() {
+      [el.title, el.raffleTag, el.totalSpots, el.pricePerSpot, el.quickTotalSpots].forEach((input) => {
+        input.addEventListener("input", update);
+      });
+
+      el.raffleImageInput.addEventListener("change", (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (file) {
+          setRaffleImage(file);
+        }
+      });
+
+      el.imagePasteZone.addEventListener("paste", (e) => {
+        const items = Array.from((e.clipboardData && e.clipboardData.items) || []);
+        const imageItem = items.find((item) => item.type && item.type.startsWith("image/"));
+        if (!imageItem) {
+          return;
+        }
+        e.preventDefault();
+        const file = imageItem.getAsFile();
+        if (file) {
+          setRaffleImage(file);
+        }
+      });
+
+      document.getElementById("addBonus").addEventListener("click", () => addBonusRow(""));
+      document.getElementById("addClaim").addEventListener("click", () => addClaimRow("", ""));
+      document.getElementById("addQuickClaim").addEventListener("click", () => addQuickClaimRow("", ""));
+      document.getElementById("copyOutput").addEventListener("click", copyOutput);
+      document.getElementById("copyOutputWithImage").addEventListener("click", copyOutputWithImage);
+      document.getElementById("copyQuickOutput").addEventListener("click", copyQuickOutput);
+      document.getElementById("clearImage").addEventListener("click", clearRaffleImage);
+      document.getElementById("resetForm").addEventListener("click", () => {
+        resetForm();
+        showNotice("Form reset.");
+      });
+
+      setupTemplateActions();
+    }
+
+    function init() {
+      renderPayments();
+      renderBonuses();
+      renderClaims();
+      renderQuickClaims();
+      wireActions();
+      renderTemplateOptions();
+      loadDraft();
+      update();
+    }
+
+    init();
+  </script>
+</body>
+</html>
